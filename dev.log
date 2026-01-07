@@ -1,0 +1,93 @@
+   ▲ Next.js 15.3.5
+   - Local:        http://localhost:3000
+   - Network:      http://21.0.5.122:3000
+   - Environments: .env
+
+ ✓ Starting...
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+ ✓ Ready in 2.7s
+ ○ Compiling / ...
+ ✓ Compiled / in 5.7s (766 modules)
+ GET / 200 in 2050ms
+ GET / 200 in 28ms
+ GET / 200 in 35ms
+ GET / 200 in 49ms
+Error: Cannot apply unknown utility class `border-border`. Are you using CSS modules or similar and missing `@reference`? https://tailwindcss.com/docs/functions-and-directives#reference-directive
+    at processTicksAndRejections (null)
+ ⨯ ./src/app/globals.css:1:1
+Syntax error: tailwindcss: /home/z/my-project/src/app/globals.css Cannot apply unknown utility class `border-border`. Are you using CSS modules or similar and missing `@reference`? https://tailwindcss.com/docs/functions-and-directives#reference-directive
+
+> 1 | @tailwind base;
+    | ^
+  2 | @tailwind components;
+  3 | @tailwind utilities;
+ ⚠ Cross origin request detected from preview-chat-0c838451-760f-400e-a3fb-5f6cfc511fc2.space.z.ai to /_next/* resource. In a future major version of Next.js, you will need to explicitly configure "allowedDevOrigins" in next.config to allow this.
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+Error: Cannot apply unknown utility class `border-border`. Are you using CSS modules or similar and missing `@reference`? https://tailwindcss.com/docs/functions-and-directives#reference-directive
+    at processTicksAndRejections (null)
+ ○ Compiling /_error ...
+ ⨯ ./src/app/globals.css:1:1
+Syntax error: tailwindcss: /home/z/my-project/src/app/globals.css Cannot apply unknown utility class `border-border`. Are you using CSS modules or similar and missing `@reference`? https://tailwindcss.com/docs/functions-and-directives#reference-directive
+
+> 1 | @tailwind base;
+    | ^
+  2 | @tailwind components;
+  3 | @tailwind utilities;
+ GET / 500 in 5749ms
+ GET / 500 in 221ms
+ GET / 500 in 224ms
+ GET / 500 in 225ms
+<w> [webpack.cache.PackFileCacheStrategy] Skipped not serializable cache item 'Compilation/modules|/home/z/my-project/node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[10].use[2]!/home/z/my-project/node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[13].oneOf[10].use[3]!/home/z/my-project/src/app/globals.css': No serializer registered for PostCSSSyntaxError
+<w> while serializing webpack/lib/cache/PackFileCacheStrategy.PackContentItems -> webpack/lib/NormalModule -> webpack/lib/ModuleBuildError -> PostCSSSyntaxError
+Error: Cannot apply unknown utility class `border-border`. Are you using CSS modules or similar and missing `@reference`? https://tailwindcss.com/docs/functions-and-directives#reference-directive
+    at processTicksAndRejections (null)
+ ⨯ ./src/app/globals.css:1:1
+Syntax error: tailwindcss: /home/z/my-project/src/app/globals.css Cannot apply unknown utility class `border-border`. Are you using CSS modules or similar and missing `@reference`? https://tailwindcss.com/docs/functions-and-directives#reference-directive
+
+> 1 | @tailwind base;
+    | ^
+  2 | @tailwind components;
+  3 | @tailwind utilities;
+ GET / 500 in 207ms
+Error: Cannot apply unknown utility class `border-border`. Are you using CSS modules or similar and missing `@reference`? https://tailwindcss.com/docs/functions-and-directives#reference-directive
+    at processTicksAndRejections (null)
+ ⨯ ./src/app/globals.css:1:1
+Syntax error: tailwindcss: /home/z/my-project/src/app/globals.css Cannot apply unknown utility class `border-border`. Are you using CSS modules or similar and missing `@reference`? https://tailwindcss.com/docs/functions-and-directives#reference-directive
+
+> 1 | @tailwind base;
+    | ^
+  2 | @tailwind components;
+  3 | @tailwind utilities;
+<w> [webpack.cache.PackFileCacheStrategy] Skipped not serializable cache item 'Compilation/modules|/home/z/my-project/node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[10].use[2]!/home/z/my-project/node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[13].oneOf[10].use[3]!/home/z/my-project/src/app/globals.css': No serializer registered for PostCSSSyntaxError
+<w> while serializing webpack/lib/cache/PackFileCacheStrategy.PackContentItems -> webpack/lib/NormalModule -> webpack/lib/ModuleBuildError -> PostCSSSyntaxError
+ GET / 500 in 204ms
+Error: Cannot apply unknown utility class `border-border`. Are you using CSS modules or similar and missing `@reference`? https://tailwindcss.com/docs/functions-and-directives#reference-directive
+    at processTicksAndRejections (null)
+ ⨯ ./src/app/globals.css:1:1
+Syntax error: tailwindcss: /home/z/my-project/src/app/globals.css Cannot apply unknown utility class `border-border`. Are you using CSS modules or similar and missing `@reference`? https://tailwindcss.com/docs/functions-and-directives#reference-directive
+
+> 1 | @tailwind base;
+    | ^
+  2 | @tailwind components;
+  3 | @tailwind utilities;
+Error: Cannot apply unknown utility class `bg-background`. Are you using CSS modules or similar and missing `@reference`? https://tailwindcss.com/docs/functions-and-directives#reference-directive
+    at processTicksAndRejections (null)
+ ⨯ ./src/app/globals.css:1:1
+Syntax error: tailwindcss: /home/z/my-project/src/app/globals.css Cannot apply unknown utility class `bg-background`. Are you using CSS modules or similar and missing `@reference`? https://tailwindcss.com/docs/functions-and-directives#reference-directive
+
+> 1 | @tailwind base;
+    | ^
+  2 | @tailwind components;
+  3 | @tailwind utilities;
+ GET / 500 in 210ms
+ ✓ Compiled /_error in 980ms (1082 modules)
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 687ms (1086 modules)
+ GET /_next/static/webpack/61ddcd2472f5cec9.webpack.hot-update.json 404 in 908ms
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET / 200 in 56ms
+ GET / 200 in 54ms
