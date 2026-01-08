@@ -40,10 +40,10 @@ export function StudioForm() {
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      materialType: searchParams.get('materialType') || 'Flashcards',
-      topic: searchParams.get('topic') || 'The Water Cycle',
-      gradeLevel: searchParams.get('gradeLevel') || '4th Grade',
-      instructions: searchParams.get('instructions') || 'Create 10 flashcards. One side should have the term, the other side a simple definition.',
+      materialType: 'Flashcards',
+      topic: '',
+      gradeLevel: '',
+      instructions: '',
     },
   });
 
@@ -83,13 +83,14 @@ export function StudioForm() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate material');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate material');
       }
 
       const result = await response.json();
       setResult(result);
     } catch (error) {
-      console.error(error);
+      console.error('Error:', error);
       toast({
         variant: 'destructive',
         title: 'An error occurred.',

@@ -70,7 +70,7 @@ export function LessonPlannerForm() {
     }
   }
 
-  const createStudioLink = () => {
+    const createStudioLink = () => {
     if (!result) return '';
     const { subject, gradeLevel } = form.getValues();
 
@@ -83,7 +83,7 @@ export function LessonPlannerForm() {
     }
 
     return `/studio`;
-    }
+  }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
