@@ -4,10 +4,6 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import {
-  generateLearningMaterial,
-  GenerateLearningMaterialOutput,
-} from '@/ai/flows/generate-learning-material';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -36,7 +32,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export function StudioForm() {
-  const [result, setResult] = useState<GenerateLearningMaterialOutput | null>(null);
+  const [result, setResult] = useState<{content: string} | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const searchParams = useSearchParams();
@@ -52,20 +48,46 @@ export function StudioForm() {
   });
 
   useEffect(() => {
+    // Check for data passed from lesson planner via localStorage
+    const materialType = searchParams.get('materialType') || localStorage.getItem('studioMaterialType');
+    const topic = searchParams.get('topic') || localStorage.getItem('studioTopic');
+    const gradeLevel = searchParams.get('gradeLevel') || localStorage.getItem('studioGradeLevel');
+    const instructions = searchParams.get('instructions') || localStorage.getItem('studioInstructions');
+
     form.reset({
-        materialType: searchParams.get('materialType') || 'Flashcards',
-        topic: searchParams.get('topic') || '',
-        gradeLevel: searchParams.get('gradeLevel') || '',
-        instructions: searchParams.get('instructions') || '',
-    })
+      materialType: materialType || 'Flashcards',
+      topic: topic || '',
+      gradeLevel: gradeLevel || '',
+      instructions: instructions || '',
+    });
+
+    // Clear localStorage after reading to prevent stale data
+    if (typeof window !== 'undefined' && localStorage.getItem('studioTopic')) {
+      localStorage.removeItem('studioMaterialType');
+      localStorage.removeItem('studioTopic');
+      localStorage.removeItem('studioGradeLevel');
+      localStorage.removeItem('studioInstructions');
+    }
   }, [searchParams, form]);
 
   async function onSubmit(data: FormData) {
     setIsLoading(true);
     setResult(null);
     try {
-      const response = await generateLearningMaterial(data);
-      setResult(response);
+      const response = await fetch('/api/generate-material', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate material');
+      }
+
+      const result = await response.json();
+      setResult(result);
     } catch (error) {
       console.error(error);
       toast({

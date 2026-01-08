@@ -73,12 +73,16 @@ export function LessonPlannerForm() {
   const createStudioLink = () => {
     if (!result) return '';
     const { subject, gradeLevel } = form.getValues();
-    const params = new URLSearchParams({
-      topic: subject,
-      gradeLevel,
-      instructions: `Based on the following lesson plan, generate the necessary materials (e.g., flashcards, worksheets):\n\n${result.lessonPlan}`,
-    });
-    return `/studio?${params.toString()}`;
+
+    // Save to localStorage to avoid URL length issues
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('studioMaterialType', 'Learning Materials');
+      localStorage.setItem('studioTopic', subject);
+      localStorage.setItem('studioGradeLevel', gradeLevel);
+      localStorage.setItem('studioInstructions', `Based on the following lesson plan, generate the necessary materials (e.g., flashcards, worksheets):\n\n${result.lessonPlan}`);
+    }
+
+    return `/studio`;
     }
 
   return (
