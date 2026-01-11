@@ -1,5 +1,3 @@
-'use server';
-
 /**
  * @fileOverview A flow for generating custom learning materials.
  *
@@ -8,8 +6,8 @@
  * - GenerateLearningMaterialOutput - The return type for the function.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { ai } from '@/ai/genkit';
+import { z } from 'genkit';
 
 const GenerateLearningMaterialInputSchema = z.object({
   materialType: z.string().describe('The type of material to generate (e.g., Flashcards, Worksheet, Chart).'),
@@ -40,8 +38,8 @@ export async function generateLearningMaterial(
 
 const prompt = ai.definePrompt({
   name: 'generateLearningMaterialPrompt',
-  input: {schema: GenerateLearningMaterialInputSchema},
-  output: {schema: GenerateLearningMaterialOutputSchema},
+  input: { schema: GenerateLearningMaterialInputSchema },
+  output: { schema: GenerateLearningMaterialOutputSchema },
   prompt: `You are an expert curriculum designer and teacher's assistant. Your task is to create high-quality learning materials.
 
 Material Type: {{{materialType}}}
@@ -65,9 +63,9 @@ const generateLearningMaterialFlow = ai.defineFlow(
     outputSchema: GenerateLearningMaterialOutputSchema,
   },
   async (input) => {
-    const {output} = await prompt({
-        ...input,
-        instructions: input.instructions ?? 'Use a standard format for this material type.'
+    const { output } = await prompt({
+      ...input,
+      instructions: input.instructions ?? 'Use a standard format for this material type.'
     });
     return output!;
   }

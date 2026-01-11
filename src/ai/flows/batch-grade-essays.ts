@@ -1,5 +1,3 @@
-'use server';
-
 /**
  * @fileOverview A flow for batch grading multiple essays at once.
  *
@@ -8,8 +6,8 @@
  * - BatchGradeEssaysOutput - The return type for the batchGradeEssays function.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { ai } from '@/ai/genkit';
+import { z } from 'genkit';
 
 const EssayInputSchema = z.object({
   fileName: z.string().describe('The filename of the essay.'),
@@ -52,8 +50,8 @@ export async function batchGradeEssays(
 
 const prompt = ai.definePrompt({
   name: 'batchGradeEssaysPrompt',
-  input: {schema: BatchGradeEssaysInputSchema},
-  output: {schema: BatchGradeEssaysOutputSchema},
+  input: { schema: BatchGradeEssaysInputSchema },
+  output: { schema: BatchGradeEssaysOutputSchema },
   prompt: `You are an AI assistant that grades student essays in batch. Your grading should be adapted to the students' grade level.
 
 You must follow the teacher's notes as the ultimate source of truth.
@@ -95,7 +93,7 @@ const batchGradeEssaysFlow = ai.defineFlow(
     outputSchema: BatchGradeEssaysOutputSchema,
   },
   async (input) => {
-    const {output} = await prompt({
+    const { output } = await prompt({
       ...input,
       teacherNotes: input.teacherNotes ?? 'No specific teacher notes provided.',
       styleGuide: input.styleGuide ?? 'No style guide provided. Use a generally encouraging and constructive tone.',

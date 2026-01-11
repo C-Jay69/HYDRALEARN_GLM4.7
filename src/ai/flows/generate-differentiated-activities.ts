@@ -1,5 +1,3 @@
-'use server';
-
 /**
  * @fileOverview This file defines a Genkit flow for generating differentiated activities for students.
  *
@@ -10,8 +8,8 @@
  * @exports GenerateDifferentiatedActivitiesOutput - The output type for the generateDifferentiatedActivities function.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { ai } from '@/ai/genkit';
+import { z } from 'genkit';
 
 const StudentProfileSchema = z.object({
   studentId: z.string().describe('Unique identifier for the student.'),
@@ -60,8 +58,8 @@ export async function generateDifferentiatedActivities(
 
 const prompt = ai.definePrompt({
   name: 'generateDifferentiatedActivitiesPrompt',
-  input: {schema: GenerateDifferentiatedActivitiesInputSchema},
-  output: {schema: GenerateDifferentiatedActivitiesOutputSchema},
+  input: { schema: GenerateDifferentiatedActivitiesInputSchema },
+  output: { schema: GenerateDifferentiatedActivitiesOutputSchema },
   prompt: `You are an experienced teacher skilled at creating differentiated learning activities.
 
         For each student, suggest an activity that caters to their learning style, needs, and current level, given the topic and grade level.
@@ -88,7 +86,7 @@ const generateDifferentiatedActivitiesFlow = ai.defineFlow(
     outputSchema: GenerateDifferentiatedActivitiesOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    const { output } = await prompt(input);
     return output!;
   }
 );

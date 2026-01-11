@@ -1,5 +1,3 @@
-'use server';
-
 /**
  * @fileOverview This file defines a Genkit flow for generating personalized lesson plans for students.
  *
@@ -13,8 +11,8 @@
  * }
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { ai } from '@/ai/genkit';
+import { z } from 'genkit';
 
 /**
  * Input schema for the generateLessonPlan flow.  Includes student needs, current curriculum,
@@ -62,8 +60,8 @@ export async function generateLessonPlan(input: GenerateLessonPlanInput): Promis
  */
 const generateLessonPlanPrompt = ai.definePrompt({
   name: 'generateLessonPlanPrompt',
-  input: {schema: GenerateLessonPlanInputSchema},
-  output: {schema: GenerateLessonPlanOutputSchema},
+  input: { schema: GenerateLessonPlanInputSchema },
+  output: { schema: GenerateLessonPlanOutputSchema },
   prompt: `You are an expert teacher, skilled in creating personalized lesson plans.
 
   Based on the student's needs, the curriculum, objectives, grade level and subject, generate a detailed lesson plan.
@@ -90,7 +88,7 @@ const generateLessonPlanFlow = ai.defineFlow(
     outputSchema: GenerateLessonPlanOutputSchema,
   },
   async input => {
-    const {output} = await generateLessonPlanPrompt(input);
+    const { output } = await generateLessonPlanPrompt(input);
     return output!;
   }
 );

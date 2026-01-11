@@ -1,5 +1,3 @@
-'use server';
-
 /**
  * @fileOverview A flow for creating automatic assessments.
  *
@@ -8,8 +6,8 @@
  * - CreateAutomaticAssessmentOutput - The return type for the createAutomaticassessment function.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { ai } from '@/ai/genkit';
+import { z } from 'genkit';
 import { QuizQuestionSchema } from '@/ai/schemas/quiz-schema';
 
 const CreateAutomaticAssessmentInputSchema = z.object({
@@ -52,8 +50,8 @@ export async function createAutomaticAssessment(
 
 const prompt = ai.definePrompt({
   name: 'createAutomaticAssessmentPrompt',
-  input: {schema: CreateAutomaticAssessmentInputSchema},
-  output: {schema: CreateAutomaticAssessmentOutputSchema},
+  input: { schema: CreateAutomaticAssessmentInputSchema },
+  output: { schema: CreateAutomaticAssessmentOutputSchema },
   prompt: `You are an expert teacher creating an automatic assessment for the topic of {{{topic}}} for grade level {{{gradeLevel}}}.
 
 The assessment type is {{{assessmentType}}}. The learning objectives are: {{{learningObjectives}}}.
@@ -78,7 +76,7 @@ const createAutomaticAssessmentFlow = ai.defineFlow(
     outputSchema: CreateAutomaticAssessmentOutputSchema,
   },
   async (input) => {
-    const {output} = await prompt(input);
+    const { output } = await prompt(input);
     return output!;
   }
 );

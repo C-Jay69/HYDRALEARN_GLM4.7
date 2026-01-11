@@ -69,7 +69,10 @@ export function EssayGraderForm() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to grade essay');
+        const errorMessage = errorData.details
+          ? `${errorData.error}: ${errorData.details}`
+          : (errorData.error || 'Failed to grade essay');
+        throw new Error(errorMessage);
       }
 
       const responseData = await response.json();

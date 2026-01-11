@@ -1,5 +1,3 @@
-'use server';
-
 /**
  * @fileOverview An AI agent for grading student essays with teacher override.
  *
@@ -8,8 +6,8 @@
  * - AiGradeEssaysOutput - The return type for the aiGradeEssays function.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { ai } from '@/ai/genkit';
+import { z } from 'genkit';
 
 const AiGradeEssaysInputSchema = z.object({
   essay: z.string().describe('The text of the essay to be graded.'),
@@ -71,7 +69,7 @@ const aiGradeEssaysFlow = ai.defineFlow(
     outputSchema: AiGradeEssaysOutputSchema,
   },
   async input => {
-    const {output} = await prompt({
+    const { output } = await prompt({
       ...input,
       teacherNotes: input.teacherNotes ?? 'No specific teacher notes provided.',
       styleGuide: input.styleGuide ?? 'No style guide provided. Use a generally encouraging and constructive tone.',
