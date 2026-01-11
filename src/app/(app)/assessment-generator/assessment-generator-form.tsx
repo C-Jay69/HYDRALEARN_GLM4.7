@@ -4,10 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import {
-  createAutomaticAssessment,
-  CreateAutomaticAssessmentOutput,
-} from '@/ai/flows/create-automatic-assessment';
+import { CreateAutomaticAssessmentOutput } from '@/ai/flows/create-automatic-assessment';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -28,8 +25,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Sparkles, Wand2 } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Loader2, Wand2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -63,14 +60,27 @@ export function AssessmentGeneratorForm() {
     setIsLoading(true);
     setResult(null);
     try {
-      const response = await createAutomaticAssessment(data);
-      setResult(response);
-    } catch (error) {
+      const response = await fetch('/api/create-assessment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create assessment');
+      }
+
+      const responseData = await response.json();
+      setResult(responseData);
+    } catch (error: any) {
       console.error(error);
       toast({
         variant: 'destructive',
         title: 'An error occurred.',
-        description: 'Failed to generate assessment. Please try again.',
+        description: error.message || 'Failed to generate assessment. Please try again.',
       });
     } finally {
       setIsLoading(false);
@@ -108,7 +118,7 @@ export function AssessmentGeneratorForm() {
               </FormItem>
             )}
           />
-          
+
           <FormField
             control={form.control}
             name="assessmentType"
@@ -172,55 +182,55 @@ export function AssessmentGeneratorForm() {
                 Creating...
               </>
             ) : (
-                <>
+              <>
                 <Wand2 className="mr-2 h-4 w-4" />
                 Create Assessment
-                </>
+              </>
             )}
           </Button>
         </form>
       </Form>
-      
+
       <div className="space-y-4">
         <h3 className="font-headline text-2xl font-bold">Generated Assessment</h3>
         <div className="min-h-[400px]">
-            {isLoading && (
-                <Card className="h-full flex items-center justify-center border-dashed">
-                    <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                        <Loader2 className="h-8 w-8 animate-spin" />
-                        <p>AI is building your assessment...</p>
-                    </div>
+          {isLoading && (
+            <Card className="h-full flex items-center justify-center border-dashed">
+              <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                <Loader2 className="h-8 w-8 animate-spin" />
+                <p>AI is building your assessment...</p>
+              </div>
+            </Card>
+          )}
+          {!isLoading && !result && (
+            <Card className="h-full flex items-center justify-center border-dashed">
+              <div className="text-center text-muted-foreground">
+                <p>Your assessment will appear here.</p>
+              </div>
+            </Card>
+          )}
+          {result && (
+            <Tabs defaultValue="content" className="w-full">
+              <TabsList>
+                <TabsTrigger value="content">Assessment Content</TabsTrigger>
+                <TabsTrigger value="feedback">AI Feedback</TabsTrigger>
+              </TabsList>
+              <TabsContent value="content">
+                <Card>
+                  <CardContent className="p-6">
+                    <pre className="whitespace-pre-wrap font-body text-sm">{result.assessmentContent}</pre>
+                  </CardContent>
                 </Card>
-            )}
-            {!isLoading && !result && (
-                <Card className="h-full flex items-center justify-center border-dashed">
-                    <div className="text-center text-muted-foreground">
-                        <p>Your assessment will appear here.</p>
-                    </div>
+              </TabsContent>
+              <TabsContent value="feedback">
+                <Card>
+                  <CardContent className="p-6">
+                    <pre className="whitespace-pre-wrap font-body text-sm">{result.feedback}</pre>
+                  </CardContent>
                 </Card>
-            )}
-            {result && (
-              <Tabs defaultValue="content" className="w-full">
-                <TabsList>
-                  <TabsTrigger value="content">Assessment Content</TabsTrigger>
-                  <TabsTrigger value="feedback">AI Feedback</TabsTrigger>
-                </TabsList>
-                <TabsContent value="content">
-                    <Card>
-                        <CardContent className="p-6">
-                            <pre className="whitespace-pre-wrap font-body text-sm">{result.assessmentContent}</pre>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-                <TabsContent value="feedback">
-                    <Card>
-                         <CardContent className="p-6">
-                            <pre className="whitespace-pre-wrap font-body text-sm">{result.feedback}</pre>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-              </Tabs>
-            )}
+              </TabsContent>
+            </Tabs>
+          )}
         </div>
       </div>
     </div>

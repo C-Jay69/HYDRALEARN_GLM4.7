@@ -4,10 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import {
-  generateLessonPlan,
-  GenerateLessonPlanOutput,
-} from '@/ai/flows/generate-lesson-plan';
+import { GenerateLessonPlanOutput } from '@/ai/flows/generate-lesson-plan';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -21,7 +18,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Loader2, Sparkles, Brush } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
@@ -56,34 +53,44 @@ export function LessonPlannerForm() {
     setIsLoading(true);
     setResult(null);
     try {
-      const response = await generateLessonPlan(data);
-      setResult(response);
-    } catch (error) {
+      const response = await fetch('/api/generate-lesson-plan', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate lesson plan');
+      }
+
+      const responseData = await response.json();
+      setResult(responseData);
+    } catch (error: any) {
       console.error(error);
       toast({
         variant: "destructive",
         title: "An error occurred.",
-        description: "Failed to generate lesson plan. Please try again.",
+        description: error.message || "Failed to generate lesson plan. Please try again.",
       });
     } finally {
       setIsLoading(false);
     }
   }
 
-    const createStudioLink = () => {
-    if (!result) return '';
+  const prepareStudioData = () => {
+    if (!result) return;
     const { subject, gradeLevel } = form.getValues();
 
-    // Save to localStorage to avoid URL length issues
     if (typeof window !== 'undefined') {
       localStorage.setItem('studioMaterialType', 'Learning Materials');
       localStorage.setItem('studioTopic', subject);
       localStorage.setItem('studioGradeLevel', gradeLevel);
       localStorage.setItem('studioInstructions', `Based on the following lesson plan, generate the necessary materials (e.g., flashcards, worksheets):\n\n${result.lessonPlan}`);
     }
-
-    return `/studio`;
-  }
+  };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -177,48 +184,48 @@ export function LessonPlannerForm() {
                 Generating...
               </>
             ) : (
-                <>
+              <>
                 <Sparkles className="mr-2 h-4 w-4" />
                 Generate Plan
-                </>
+              </>
             )}
           </Button>
         </form>
       </Form>
-      
+
       <div className="space-y-4">
         <h3 className="font-headline text-2xl font-bold">Generated Plan</h3>
         <Card className="min-h-[400px]">
-            {isLoading && (
-                <div className="flex items-center justify-center h-full border-dashed rounded-lg">
-                    <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                        <Loader2 className="h-8 w-8 animate-spin" />
-                        <p>AI is thinking...</p>
-                    </div>
-                </div>
-            )}
-            {!isLoading && !result && (
-                <div className="flex items-center justify-center h-full border-dashed rounded-lg">
-                    <div className="text-center text-muted-foreground">
-                        <p>Your lesson plan will appear here.</p>
-                    </div>
-                </div>
-            )}
-            {result && (
-                <>
-                    <CardContent className="p-6 max-h-[60vh] overflow-y-auto">
-                        <pre className="whitespace-pre-wrap font-body text-sm">{result.lessonPlan}</pre>
-                    </CardContent>
-                    <CardFooter>
-                        <Button asChild>
-                            <Link href={createStudioLink()}>
-                                <Brush className="mr-2 h-4 w-4" />
-                                Generate Materials
-                            </Link>
-                        </Button>
-                    </CardFooter>
-                </>
-            )}
+          {isLoading && (
+            <div className="flex items-center justify-center h-full border-dashed rounded-lg">
+              <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                <Loader2 className="h-8 w-8 animate-spin" />
+                <p>AI is thinking...</p>
+              </div>
+            </div>
+          )}
+          {!isLoading && !result && (
+            <div className="flex items-center justify-center h-full border-dashed rounded-lg">
+              <div className="text-center text-muted-foreground">
+                <p>Your lesson plan will appear here.</p>
+              </div>
+            </div>
+          )}
+          {result && (
+            <>
+              <CardContent className="p-6 max-h-[60vh] overflow-y-auto">
+                <pre className="whitespace-pre-wrap font-body text-sm">{result.lessonPlan}</pre>
+              </CardContent>
+              <CardFooter>
+                <Button asChild onClick={prepareStudioData}>
+                  <Link href="/studio">
+                    <Brush className="mr-2 h-4 w-4" />
+                    Generate Materials
+                  </Link>
+                </Button>
+              </CardFooter>
+            </>
+          )}
         </Card>
       </div>
     </div>

@@ -4,10 +4,7 @@ import { useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import {
-  generateDifferentiatedActivities,
-  GenerateDifferentiatedActivitiesOutput,
-} from '@/ai/flows/generate-differentiated-activities';
+import { GenerateDifferentiatedActivitiesOutput } from '@/ai/flows/generate-differentiated-activities';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -20,7 +17,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Loader2, PlusCircle, Sparkles, Trash2, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -67,14 +64,32 @@ export function DifferentiatedActivitiesForm() {
     setIsLoading(true);
     setResult(null);
     try {
-      const response = await generateDifferentiatedActivities(data);
-      setResult(response);
-    } catch (error) {
+      const response = await fetch('/api/generate-differentiated-activities', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          topic: data.topic,
+          gradeLevel: data.gradeLevel,
+          studentProfiles: data.students,
+          learningObjectives: 'Standard alignment based on grade level and topic.',
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate activities');
+      }
+
+      const responseData = await response.json();
+      setResult(responseData);
+    } catch (error: any) {
       console.error(error);
       toast({
         variant: 'destructive',
         title: 'An error occurred.',
-        description: 'Failed to generate activities. Please try again.',
+        description: error.message || 'Failed to generate activities. Please try again.',
       });
     } finally {
       setIsLoading(false);
@@ -115,7 +130,7 @@ export function DifferentiatedActivitiesForm() {
           </div>
 
           <Separator />
-          
+
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-medium">Student Profiles</h3>
@@ -199,7 +214,7 @@ export function DifferentiatedActivitiesForm() {
               <p className="text-sm font-medium text-destructive mt-2">{form.formState.errors.students.message}</p>
             )}
           </div>
-          
+
 
           <Button type="submit" disabled={isLoading} className="w-full">
             {isLoading ? (
@@ -208,59 +223,59 @@ export function DifferentiatedActivitiesForm() {
                 Suggesting Activities...
               </>
             ) : (
-                <>
+              <>
                 <Sparkles className="mr-2 h-4 w-4" />
                 Get Suggestions
-                </>
+              </>
             )}
           </Button>
         </form>
       </Form>
-      
+
       <div className="space-y-4">
         <h3 className="font-headline text-2xl font-bold">Suggested Activities</h3>
         <div className="min-h-[400px]">
-            {isLoading && (
-                <Card className="h-full flex items-center justify-center border-dashed">
-                    <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                        <Loader2 className="h-8 w-8 animate-spin" />
-                        <p>Finding the best activities...</p>
+          {isLoading && (
+            <Card className="h-full flex items-center justify-center border-dashed">
+              <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                <Loader2 className="h-8 w-8 animate-spin" />
+                <p>Finding the best activities...</p>
+              </div>
+            </Card>
+          )}
+          {!isLoading && !result && (
+            <Card className="h-full flex items-center justify-center border-dashed">
+              <div className="text-center text-muted-foreground">
+                <p>Activity suggestions will appear here.</p>
+              </div>
+            </Card>
+          )}
+          {result && (
+            <Accordion type="multiple" className="w-full space-y-4">
+              {result.activities.map((activity, index) => (
+                <AccordionItem value={`item-${index}`} key={index} className="bg-card border rounded-lg">
+                  <AccordionTrigger className="px-6 text-base hover:no-underline">
+                    <div className="flex items-center gap-2">
+                      <User className="h-5 w-5 text-primary" />
+                      Activity for {activity.studentId}
                     </div>
-                </Card>
-            )}
-            {!isLoading && !result && (
-                <Card className="h-full flex items-center justify-center border-dashed">
-                    <div className="text-center text-muted-foreground">
-                        <p>Activity suggestions will appear here.</p>
+                  </AccordionTrigger>
+                  <AccordionContent className="px-6">
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="font-semibold mb-1">Description</h4>
+                        <p className="text-sm text-muted-foreground">{activity.activityDescription}</p>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold mb-1">Justification</h4>
+                        <p className="text-sm text-muted-foreground">{activity.justification}</p>
+                      </div>
                     </div>
-                </Card>
-            )}
-            {result && (
-              <Accordion type="multiple" className="w-full space-y-4">
-                {result.activities.map((activity, index) => (
-                  <AccordionItem value={`item-${index}`} key={index} className="bg-card border rounded-lg">
-                    <AccordionTrigger className="px-6 text-base hover:no-underline">
-                      <div className="flex items-center gap-2">
-                        <User className="h-5 w-5 text-primary" />
-                        Activity for {activity.studentId}
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent className="px-6">
-                      <div className="space-y-4">
-                        <div>
-                          <h4 className="font-semibold mb-1">Description</h4>
-                          <p className="text-sm text-muted-foreground">{activity.activityDescription}</p>
-                        </div>
-                        <div>
-                          <h4 className="font-semibold mb-1">Justification</h4>
-                          <p className="text-sm text-muted-foreground">{activity.justification}</p>
-                        </div>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-            )}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          )}
         </div>
       </div>
     </div>

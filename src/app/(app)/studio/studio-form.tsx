@@ -32,7 +32,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export function StudioForm() {
-  const [result, setResult] = useState<{content: string} | null>(null);
+  const [result, setResult] = useState<{ content: string } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const searchParams = useSearchParams();
@@ -54,19 +54,22 @@ export function StudioForm() {
     const gradeLevel = searchParams.get('gradeLevel') || localStorage.getItem('studioGradeLevel');
     const instructions = searchParams.get('instructions') || localStorage.getItem('studioInstructions');
 
-    form.reset({
-      materialType: materialType || 'Flashcards',
-      topic: topic || '',
-      gradeLevel: gradeLevel || '',
-      instructions: instructions || '',
-    });
+    if (materialType || topic || gradeLevel || instructions) {
+      form.reset({
+        materialType: materialType || 'Flashcards',
+        topic: topic || '',
+        gradeLevel: gradeLevel || '',
+        instructions: instructions || '',
+      });
 
-    // Clear localStorage after reading to prevent stale data
-    if (typeof window !== 'undefined' && localStorage.getItem('studioTopic')) {
-      localStorage.removeItem('studioMaterialType');
-      localStorage.removeItem('studioTopic');
-      localStorage.removeItem('studioGradeLevel');
-      localStorage.removeItem('studioInstructions');
+      // Clear localStorage after reading to prevent stale data on future direct visits
+      // but only if we actually found something to clear
+      if (typeof window !== 'undefined' && (localStorage.getItem('studioTopic') || localStorage.getItem('studioMaterialType'))) {
+        localStorage.removeItem('studioMaterialType');
+        localStorage.removeItem('studioTopic');
+        localStorage.removeItem('studioGradeLevel');
+        localStorage.removeItem('studioInstructions');
+      }
     }
   }, [searchParams, form]);
 
@@ -114,14 +117,14 @@ export function StudioForm() {
                 <FormControl>
                   <Input placeholder="e.g., Flashcards, Worksheet, Chart" {...field} />
                 </FormControl>
-                 <FormDescription>
+                <FormDescription>
                   What kind of material do you need?
                 </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
-           <FormField
+          <FormField
             control={form.control}
             name="topic"
             render={({ field }) => (
@@ -174,40 +177,40 @@ export function StudioForm() {
                 Creating...
               </>
             ) : (
-                <>
+              <>
                 <Brush className="mr-2 h-4 w-4" />
                 Generate Material
-                </>
+              </>
             )}
           </Button>
         </form>
       </Form>
-      
+
       <div className="space-y-4">
         <h3 className="font-headline text-2xl font-bold">Generated Material</h3>
         <div className="min-h-[400px]">
-            {isLoading && (
-                <Card className="h-full flex items-center justify-center border-dashed">
-                    <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                        <Loader2 className="h-8 w-8 animate-spin" />
-                        <p>AI is creating your material...</p>
-                    </div>
-                </Card>
-            )}
-            {!isLoading && !result && (
-                <Card className="h-full flex items-center justify-center border-dashed">
-                    <div className="text-center text-muted-foreground">
-                        <p>Your generated material will appear here.</p>
-                    </div>
-                </Card>
-            )}
-            {result && (
-                <Card>
-                    <CardContent className="p-6">
-                        <pre className="whitespace-pre-wrap font-body text-sm">{result.content}</pre>
-                    </CardContent>
-                </Card>
-            )}
+          {isLoading && (
+            <Card className="h-full flex items-center justify-center border-dashed">
+              <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                <Loader2 className="h-8 w-8 animate-spin" />
+                <p>AI is creating your material...</p>
+              </div>
+            </Card>
+          )}
+          {!isLoading && !result && (
+            <Card className="h-full flex items-center justify-center border-dashed">
+              <div className="text-center text-muted-foreground">
+                <p>Your generated material will appear here.</p>
+              </div>
+            </Card>
+          )}
+          {result && (
+            <Card>
+              <CardContent className="p-6">
+                <pre className="whitespace-pre-wrap font-body text-sm">{result.content}</pre>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>

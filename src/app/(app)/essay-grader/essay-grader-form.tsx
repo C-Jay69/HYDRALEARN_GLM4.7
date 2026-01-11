@@ -4,10 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import {
-  aiGradeEssays,
-  AiGradeEssaysOutput,
-} from '@/ai/flows/ai-grade-essays';
+import { AiGradeEssaysOutput } from '@/ai/flows/ai-grade-essays';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -20,7 +17,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Sparkles } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
@@ -58,14 +55,31 @@ export function EssayGraderForm() {
       // Fetch the style guide from localStorage
       const styleGuide = localStorage.getItem('teacherStyleGuide');
 
-      const response = await aiGradeEssays({ ...data, styleGuide: styleGuide ?? undefined });
-      setResult(response);
-    } catch (error) {
+      const response = await fetch('/api/grade-essay', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          essayContent: data.essay,
+          rubric: data.rubric,
+          studentStyleGuide: styleGuide ?? undefined,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to grade essay');
+      }
+
+      const responseData = await response.json();
+      setResult(responseData);
+    } catch (error: any) {
       console.error(error);
       toast({
         variant: 'destructive',
         title: 'An error occurred.',
-        description: 'Failed to grade essay. Please try again.',
+        description: error.message || 'Failed to grade essay. Please try again.',
       });
     } finally {
       setIsLoading(false);
@@ -93,7 +107,7 @@ export function EssayGraderForm() {
               </FormItem>
             )}
           />
-          
+
           <FormField
             control={form.control}
             name="gradeLevel"
@@ -156,54 +170,54 @@ export function EssayGraderForm() {
                 Grading...
               </>
             ) : (
-                <>
+              <>
                 <Sparkles className="mr-2 h-4 w-4" />
                 Grade Essay
-                </>
+              </>
             )}
           </Button>
         </form>
       </Form>
-      
+
       <div className="space-y-4">
         <h3 className="font-headline text-2xl font-bold">AI Grading Results</h3>
         <div className="min-h-[400px]">
-            {isLoading && (
-                <Card className="h-full flex items-center justify-center border-dashed">
-                    <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                        <Loader2 className="h-8 w-8 animate-spin" />
-                        <p>AI is reading and grading...</p>
-                    </div>
-                </Card>
-            )}
-            {!isLoading && !result && (
-                <Card className="h-full flex items-center justify-center border-dashed">
-                    <div className="text-center text-muted-foreground">
-                        <p>Grading results will appear here.</p>
-                    </div>
-                </Card>
-            )}
-            {result && (
-                <Card>
-                    <CardHeader>
-                        <div className="flex items-start justify-between">
-                            <CardTitle>Results</CardTitle>
-                            <Badge variant="secondary" className="text-lg">Grade: {result.grade}</Badge>
-                        </div>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        <div>
-                            <h4 className="font-semibold text-base mb-2">Feedback for Student</h4>
-                            <p className="text-sm text-muted-foreground">{result.feedback}</p>
-                        </div>
-                        <Separator />
-                        <div>
-                            <h4 className="font-semibold text-base mb-2">AI Reasoning (for teacher)</h4>
-                            <p className="text-sm text-muted-foreground">{result.reasoning}</p>
-                        </div>
-                    </CardContent>
-                </Card>
-            )}
+          {isLoading && (
+            <Card className="h-full flex items-center justify-center border-dashed">
+              <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                <Loader2 className="h-8 w-8 animate-spin" />
+                <p>AI is reading and grading...</p>
+              </div>
+            </Card>
+          )}
+          {!isLoading && !result && (
+            <Card className="h-full flex items-center justify-center border-dashed">
+              <div className="text-center text-muted-foreground">
+                <p>Grading results will appear here.</p>
+              </div>
+            </Card>
+          )}
+          {result && (
+            <Card>
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <CardTitle>Results</CardTitle>
+                  <Badge variant="secondary" className="text-lg">Grade: {result.grade}</Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div>
+                  <h4 className="font-semibold text-base mb-2">Feedback for Student</h4>
+                  <p className="text-sm text-muted-foreground">{result.feedback}</p>
+                </div>
+                <Separator />
+                <div>
+                  <h4 className="font-semibold text-base mb-2">AI Reasoning (for teacher)</h4>
+                  <p className="text-sm text-muted-foreground">{result.reasoning}</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>
