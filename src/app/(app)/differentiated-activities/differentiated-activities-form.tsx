@@ -72,8 +72,7 @@ export function DifferentiatedActivitiesForm() {
         body: JSON.stringify({
           topic: data.topic,
           gradeLevel: data.gradeLevel,
-          studentProfiles: data.students,
-          learningObjectives: 'Standard alignment based on grade level and topic.',
+          students: data.students,
         }),
       });
 

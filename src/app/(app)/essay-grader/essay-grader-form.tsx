@@ -61,9 +61,11 @@ export function EssayGraderForm() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          essayContent: data.essay,
+          essay: data.essay,
+          gradeLevel: data.gradeLevel,
           rubric: data.rubric,
-          studentStyleGuide: styleGuide ?? undefined,
+          teacherNotes: data.teacherNotes,
+          styleGuide: styleGuide ?? undefined,
         }),
       });
 

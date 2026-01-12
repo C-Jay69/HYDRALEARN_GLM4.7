@@ -4,9 +4,9 @@ import { generateDifferentiatedActivities } from '@/ai/flows/generate-differenti
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { topic, gradeLevel, studentProfiles, learningObjectives } = body;
+        const { topic, gradeLevel, students } = body;
 
-        if (!topic || !gradeLevel || !studentProfiles || !learningObjectives) {
+        if (!topic || !gradeLevel || !students) {
             return NextResponse.json(
                 { error: 'Missing required fields' },
                 { status: 400 }
@@ -16,8 +16,7 @@ export async function POST(req: NextRequest) {
         const result = await generateDifferentiatedActivities({
             topic,
             gradeLevel,
-            studentProfiles,
-            learningObjectives,
+            students,
         });
 
         return NextResponse.json(result);

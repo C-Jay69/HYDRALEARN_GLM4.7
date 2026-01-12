@@ -9,6 +9,13 @@ export async function POST(req: NextRequest) {
 
     const { studentNeeds, curriculum, objectives, gradeLevel, subject } = body;
 
+    console.log('Validating individual fields...');
+    console.log(`- studentNeeds: ${!!studentNeeds} (${studentNeeds?.length || 0} chars)`);
+    console.log(`- curriculum: ${!!curriculum}`);
+    console.log(`- objectives: ${!!objectives}`);
+    console.log(`- gradeLevel: ${!!gradeLevel}`);
+    console.log(`- subject: ${!!subject}`);
+
     if (!studentNeeds || !curriculum || !objectives || !gradeLevel || !subject) {
       console.error('Missing required fields in request body');
       return NextResponse.json(

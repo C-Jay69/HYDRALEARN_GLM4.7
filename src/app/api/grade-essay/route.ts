@@ -1,22 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { aiGradeEssay } from '@/ai/flows/ai-grade-essays';
+import { aiGradeEssays } from '@/ai/flows/ai-grade-essays';
 
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { essayContent, rubric, studentStyleGuide } = body;
+        const { essay, gradeLevel, rubric, teacherNotes, styleGuide } = body;
 
-        if (!essayContent || !rubric) {
+        if (!essay || !gradeLevel || !rubric) {
             return NextResponse.json(
                 { error: 'Missing required fields' },
                 { status: 400 }
             );
         }
 
-        const result = await aiGradeEssay({
-            essayContent,
+        const result = await aiGradeEssays({
+            essay,
+            gradeLevel,
             rubric,
-            studentStyleGuide,
+            teacherNotes,
+            styleGuide,
         });
 
         return NextResponse.json(result);
