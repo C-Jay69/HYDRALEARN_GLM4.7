@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import {
-  batchGradeEssays,
   BatchGradeEssaysOutput,
 } from '@/ai/flows/batch-grade-essays';
 
@@ -69,7 +68,7 @@ export function BatchEssayGraderForm() {
       form.setValue('essays', dataTransfer.files, { shouldValidate: true });
     }
   };
-  
+
   const removeFile = (index: number) => {
     const newFiles = [...selectedFiles];
     newFiles.splice(index, 1);
@@ -86,15 +85,33 @@ export function BatchEssayGraderForm() {
       // Fetch the style guide from localStorage
       const styleGuide = typeof window !== 'undefined' ? localStorage.getItem('teacherStyleGuide') : null;
 
-      const response = await batchGradeEssays({
-        ...data,
-        essays: await Promise.all(Array.from(data.essays).map(async (file) => ({
-          fileName: file.name,
-          content: await file.text(),
-        }))),
-        styleGuide: styleGuide ?? undefined,
+      const response = await fetch('/api/batch-grade-essays', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          essays: await Promise.all(Array.from(data.essays).map(async (file) => ({
+            fileName: file.name,
+            content: await file.text(),
+          }))),
+          gradeLevel: data.gradeLevel,
+          rubric: data.rubric,
+          teacherNotes: data.teacherNotes,
+          styleGuide: styleGuide ?? undefined,
+        }),
       });
-      setResult(response);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        const errorMessage = errorData.details
+          ? `${errorData.error}: ${errorData.details}`
+          : (errorData.error || 'Failed to grade essays');
+        throw new Error(errorMessage);
+      }
+
+      const responseData = await response.json();
+      setResult(responseData);
     } catch (error) {
       console.error(error);
       toast({
@@ -106,7 +123,7 @@ export function BatchEssayGraderForm() {
       setIsLoading(false);
     }
   }
-  
+
   const downloadCsv = () => {
     if (result) {
       const blob = new Blob([result.csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -124,47 +141,47 @@ export function BatchEssayGraderForm() {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="essays"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Essay Files</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="file" 
-                      multiple 
-                      accept=".txt,.md"
-                      onChange={handleFileChange}
-                      className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Upload one or more .txt or .md files.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {selectedFiles.length > 0 && (
-                <div className="space-y-2">
-                    <h4 className="text-sm font-medium">Selected Files:</h4>
-                    <div className="space-y-2 rounded-md border p-2">
-                        {selectedFiles.map((file, index) => (
-                            <div key={index} className="flex items-center justify-between text-sm p-1">
-                                <div className="flex items-center gap-2">
-                                    <FileText className="h-4 w-4 text-muted-foreground" />
-                                    <span className="font-mono text-xs">{file.name}</span>
-                                </div>
-                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeFile(index)}>
-                                    <X className="h-4 w-4" />
-                                </Button>
-                            </div>
-                        ))}
-                    </div>
-                </div>
+          <FormField
+            control={form.control}
+            name="essays"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Essay Files</FormLabel>
+                <FormControl>
+                  <Input
+                    type="file"
+                    multiple
+                    accept=".txt,.md"
+                    onChange={handleFileChange}
+                    className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+                  />
+                </FormControl>
+                <FormDescription>
+                  Upload one or more .txt or .md files.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
             )}
+          />
+
+          {selectedFiles.length > 0 && (
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium">Selected Files:</h4>
+              <div className="space-y-2 rounded-md border p-2">
+                {selectedFiles.map((file, index) => (
+                  <div key={index} className="flex items-center justify-between text-sm p-1">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-mono text-xs">{file.name}</span>
+                    </div>
+                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeFile(index)}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           <FormField
             control={form.control}
             name="gradeLevel"
@@ -224,47 +241,47 @@ export function BatchEssayGraderForm() {
                 Grading Batch...
               </>
             ) : (
-                <>
+              <>
                 <Sparkles className="mr-2 h-4 w-4" />
                 Grade All Essays
-                </>
+              </>
             )}
           </Button>
         </form>
       </Form>
-      
+
       <div className="space-y-4">
         <h3 className="font-headline text-2xl font-bold">Grading Report</h3>
         <div className="min-h-[400px]">
-            {isLoading && (
-                <Card className="h-full flex items-center justify-center border-dashed">
-                    <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                        <Loader2 className="h-8 w-8 animate-spin" />
-                        <p>AI is grading all essays...</p>
-                    </div>
-                </Card>
-            )}
-            {!isLoading && !result && (
-                <Card className="h-full flex items-center justify-center border-dashed">
-                    <div className="text-center text-muted-foreground">
-                        <p>Your downloadable CSV report will be ready here.</p>
-                    </div>
-                </Card>
-            )}
-            {result && (
-                <Card className="h-full flex flex-col items-center justify-center text-center">
-                    <CardHeader>
-                        <CardTitle>Report Ready!</CardTitle>
-                        <CardDescription>Your CSV report with all grades is ready for download.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <Button onClick={downloadCsv}>
-                            <Download className="mr-2 h-4 w-4" />
-                            Download Grades.csv
-                        </Button>
-                    </CardContent>
-                </Card>
-            )}
+          {isLoading && (
+            <Card className="h-full flex items-center justify-center border-dashed">
+              <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                <Loader2 className="h-8 w-8 animate-spin" />
+                <p>AI is grading all essays...</p>
+              </div>
+            </Card>
+          )}
+          {!isLoading && !result && (
+            <Card className="h-full flex items-center justify-center border-dashed">
+              <div className="text-center text-muted-foreground">
+                <p>Your downloadable CSV report will be ready here.</p>
+              </div>
+            </Card>
+          )}
+          {result && (
+            <Card className="h-full flex flex-col items-center justify-center text-center">
+              <CardHeader>
+                <CardTitle>Report Ready!</CardTitle>
+                <CardDescription>Your CSV report with all grades is ready for download.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button onClick={downloadCsv}>
+                  <Download className="mr-2 h-4 w-4" />
+                  Download Grades.csv
+                </Button>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>
